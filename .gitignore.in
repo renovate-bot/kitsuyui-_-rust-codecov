@@ -7,3 +7,7 @@ gibo dump Linux
 gibo dump Windows
 gibo dump macOS
 gibo dump Rust
+echo 'coverage.lcov'
+# https://doc.rust-lang.org/cargo/faq.html#why-do-binaries-have-cargolock-in-version-control-but-not-libraries
+echo '/Cargo.lock'
+echo '.env'
