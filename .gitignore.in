@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# https://github.com/gitignore-in/legacy-gitignore-in-script
+set -euo pipefail
+cd "${0%/*}" && exec > .gitignore
+function gi() { curl -sL https://www.toptal.com/developers/gitignore/api/"$@" ;}
+gibo dump Linux
+gibo dump Windows
+gibo dump macOS
+gibo dump Rust
+echo 'coverage.lcov'
+# https://doc.rust-lang.org/cargo/faq.html#why-do-binaries-have-cargolock-in-version-control-but-not-libraries
+echo '/Cargo.lock'
+echo '.env'
