@@ -133,6 +133,10 @@ impl Client {
         Ok(data)
     }
 
+    /**
+     * get_commits returns a list of commits for a given author.
+     * https://docs.codecov.com/reference/repos_commits_list
+     */
     pub fn get_commits(
         &self,
         author: &author::Author,
@@ -142,6 +146,10 @@ impl Client {
         Ok(commits)
     }
 
+    /**
+     * get_branches returns a list of branches for a given author.
+     * https://docs.codecov.com/reference/repos_branches_list
+     */
     pub fn get_branches(
         &self,
         author: &author::Author,
