@@ -19,7 +19,7 @@ use codecov::{Client, owner::Owner};
 let client = Client::new_from_env().unwrap();  // Read CODECOV_OWNER_TOKEN from environment variable
 let owner = Owner::new("github", "kitsuyui");
 let repos = client.get_all_repos(&owner).unwrap();
-println!("{:?}", repos);
+println!("{:?}", repos.len());
 
 let author = owner.new_author("rust-codecov");
 let repo_detail = client.get_branch_detail(&author, "main").unwrap();
