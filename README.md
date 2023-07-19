@@ -1,5 +1,9 @@
 # rust-codecov
 
+[![Crates.io](https://img.shields.io/crates/d/rust-codecov)](https://crates.io/crates/rust-codecov)
+[![codecov](https://codecov.io/gh/kitsuyui/rust-codecov/branch/main/graph/badge.svg?token=0OM9KWFZQC)](https://codecov.io/gh/kitsuyui/rust-codecov)
+[![crates.io](https://img.shields.io/crates/v/rust-codecov.svg)](https://crates.io/crates/rust-codecov)
+
 ## Description
 
 A thin wrapper for Codecov API (v2).
