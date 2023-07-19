@@ -114,6 +114,6 @@ mod tests {
             username: "codecov".to_string(),
         };
         let repos = client.get_all_repos(&owner).unwrap();
-        assert!(repos.len() > 0);
+        assert!(!repos.is_empty());
     }
 }

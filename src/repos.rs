@@ -11,15 +11,15 @@ use serde::{Deserialize, Serialize};
 pub struct ReposAPIResponse {
     pub results: Vec<Repo>,
     pub count: usize,
-    pub next: Option<URL>,
-    pub previous: Option<URL>,
+    pub next: Option<Url>,
+    pub previous: Option<Url>,
     pub total_pages: usize,
 }
 
 /**
- * URL is just a string that represents a URL. (currently)
+ * Url is just a string that represents a URL. (currently)
  */
-type URL = String;
+type Url = String;
 
 /**
  * Repo is a struct that represents a repo.
