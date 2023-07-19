@@ -1,3 +1,5 @@
+use crate::author::Author;
+use crate::url::Url;
 /**
  * Codecov v2 API
  * /repos endpoint returns a list of repos for a given owner.
@@ -17,11 +19,6 @@ pub struct ReposAPIResponse {
 }
 
 /**
- * Url is just a string that represents a URL. (currently)
- */
-type Url = String;
-
-/**
  * Repo is a struct that represents a repo.
  */
 #[derive(Serialize, Deserialize, Debug)]
@@ -34,14 +31,4 @@ pub struct Repo {
     pub branch: Option<String>,
     pub active: bool,
     pub activated: bool,
-}
-
-/**
- * Author is a struct that represents the author of a repo.
- */
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Author {
-    pub service: String,
-    pub username: String,
-    pub name: String,
 }

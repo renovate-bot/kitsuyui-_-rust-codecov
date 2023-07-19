@@ -1,5 +1,7 @@
+mod author;
+mod commits;
 mod repos;
-
+mod url;
 /**
  * Error is an enum wrapping all possible errors.
  */
@@ -100,6 +102,30 @@ impl Client {
         };
         Ok(repos)
     }
+
+    pub fn get_commits(
+        &self,
+        author: &author::Author,
+    ) -> Result<commits::CommitsAPIResponse, Error> {
+        let client = reqwest::blocking::Client::new();
+        let owner_endpoint = self.owner_endpoint(&Owner {
+            service: author.service.clone(),
+            username: author.username.clone(),
+        });
+        let url = format!("{}/repos/{}/commits", owner_endpoint, author.name,);
+        let req = client
+            .get(url)
+            .header("Authorization", self.auth_header_val());
+        let res = match req.send() {
+            Ok(res) => res,
+            Err(e) => return Err(Error::ReqwestError(e)),
+        };
+        let commits = match res.json::<commits::CommitsAPIResponse>() {
+            Ok(commits) => commits,
+            Err(e) => return Err(Error::ReqwestError(e)),
+        };
+        Ok(commits)
+    }
 }
 
 #[cfg(test)]
@@ -115,5 +141,17 @@ mod tests {
         };
         let repos = client.get_all_repos(&owner).unwrap();
         assert!(!repos.is_empty());
+    }
+
+    #[test]
+    fn test_get_commits() {
+        let client = Client::new_from_env().unwrap();
+        let author = author::Author {
+            service: "github".to_string(),
+            username: "codecov".to_string(),
+            name: "codecov-demo".to_string(),
+        };
+        let commits = client.get_commits(&author).unwrap();
+        assert!(!commits.results.is_empty());
     }
 }
