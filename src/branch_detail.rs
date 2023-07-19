@@ -47,3 +47,12 @@ pub struct File {
     pub name: String,
     pub totals: Totals,
 }
+
+impl BranchDetailAPIResponse {
+    /**
+     * Returns the latest coverage for a branch.
+     */
+    pub fn latest_coverage(&self) -> f64 {
+        self.head_commit.totals.coverage
+    }
+}

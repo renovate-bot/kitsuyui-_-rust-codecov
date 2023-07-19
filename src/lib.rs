@@ -3,6 +3,7 @@ pub mod branch_detail;
 pub mod branches;
 pub mod commits;
 pub mod errors;
+pub mod owner;
 pub mod repos;
 pub mod totals;
 pub mod url;
@@ -11,18 +12,27 @@ use author::Author;
 use crate::errors::Error;
 
 /**
+```
+use codecov::{Client, owner::Owner};
+
+// let client = Client::new("1234-5678-9012-3456"); // Set token directly
+let client = Client::new_from_env().unwrap();  // Read CODECOV_OWNER_TOKEN from environment variable
+let owner = Owner::new("github", "kitsuyui");
+let repos = client.get_all_repos(&owner).unwrap();
+println!("{:?}", repos);
+
+let author = owner.new_author("rust-codecov");
+let repo_detail = client.get_branch_detail(&author, "main").unwrap();
+println!("{:?}", repo_detail);
+println!("{}", repo_detail.latest_coverage());
+```
+ */
+
+/**
  * Client is a struct that represents a client to the Codecov API.
  */
 pub struct Client {
     token: String,
-}
-
-/**
- * Owner is a struct that represents an owner of repos.
- */
-pub struct Owner {
-    service: String,
-    username: String,
 }
 
 impl Client {
@@ -42,16 +52,13 @@ impl Client {
         format!("bearer {}", self.token)
     }
 
-    fn owner_endpoint(&self, owner: &Owner) -> String {
+    fn owner_endpoint(&self, owner: &owner::Owner) -> String {
         let api_endpoint = "https://codecov.io/api/v2";
         format!("{}/{}/{}", api_endpoint, owner.service, owner.username)
     }
 
     fn repos_endpoint(&self, author: &author::Author) -> String {
-        let owner_endpoint = self.owner_endpoint(&Owner {
-            service: author.service.clone(),
-            username: author.username.clone(),
-        });
+        let owner_endpoint = self.owner_endpoint(&author.to_owner());
         format!("{}/repos/{}", owner_endpoint, author.name)
     }
 
@@ -60,7 +67,7 @@ impl Client {
      * /repos endpoint returns a list of repos for a given owner with pagination.
      * This function will make multiple requests to get all repos.
      */
-    pub fn get_all_repos(&self, owner: &Owner) -> Result<Vec<repos::Repo>, Error> {
+    pub fn get_all_repos(&self, owner: &owner::Owner) -> Result<Vec<repos::Repo>, Error> {
         let mut repos = Vec::new();
         let mut url = format!("{}/repos?page_size=100", self.owner_endpoint(owner));
         loop {
@@ -178,10 +185,7 @@ mod tests {
     #[test]
     fn test_get_all_repos() {
         let client = Client::new_from_env().unwrap();
-        let owner = Owner {
-            service: "github".to_string(),
-            username: "codecov".to_string(),
-        };
+        let owner = owner::Owner::new("github", "codecov");
         let repos = client.get_all_repos(&owner).unwrap();
         assert!(!repos.is_empty());
     }
@@ -189,11 +193,7 @@ mod tests {
     #[test]
     fn test_get_commits() {
         let client = Client::new_from_env().unwrap();
-        let author = author::Author {
-            service: "github".to_string(),
-            username: "codecov".to_string(),
-            name: "codecov-demo".to_string(),
-        };
+        let author = author::Author::new("github", "codecov", "codecov-demo");
         let commits = client.get_commits(&author).unwrap();
         assert!(!commits.results.is_empty());
     }
@@ -201,11 +201,7 @@ mod tests {
     #[test]
     fn test_get_branches() {
         let client = Client::new_from_env().unwrap();
-        let author = author::Author {
-            service: "github".to_string(),
-            username: "codecov".to_string(),
-            name: "codecov-demo".to_string(),
-        };
+        let author = author::Author::new("github", "codecov", "codecov-demo");
         let branches = client.get_branches(&author).unwrap();
         assert!(!branches.results.is_empty());
     }
@@ -213,13 +209,10 @@ mod tests {
     #[test]
     fn test_get_branch_detail() {
         let client = Client::new_from_env().unwrap();
-        let author = author::Author {
-            service: "github".to_string(),
-            username: "codecov".to_string(),
-            name: "codecov-demo".to_string(),
-        };
+        let author = author::Author::new("github", "codecov", "codecov-demo");
         let branch_name = "main";
         let branch_detail = client.get_branch_detail(&author, branch_name).unwrap();
         assert_eq!(branch_detail.name, branch_name);
+        assert!(branch_detail.latest_coverage() > 0.0)
     }
 }
