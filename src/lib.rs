@@ -26,7 +26,7 @@ pub struct Owner {
 
 impl Client {
     pub fn new_from_env() -> Result<Client, Error> {
-        let token = match std::env::var("CODECOV_TOKEN") {
+        let token = match std::env::var("CODECOV_OWNER_TOKEN") {
             Ok(token) => token,
             Err(e) => return Err(Error::EnvError(e)),
         };

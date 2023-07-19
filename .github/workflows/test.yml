@@ -21,7 +21,7 @@ jobs:
       - run: cargo test
         env:
           # Needed for API tests
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_OWNER_TOKEN: ${{ secrets.CODECOV_OWNER_TOKEN }}
 
   format:
     name: Format
@@ -68,7 +68,7 @@ jobs:
           cargo llvm-cov --lcov --output-path coverage.lcov
         env:
           # Needed for API tests
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_OWNER_TOKEN: ${{ secrets.CODECOV_OWNER_TOKEN }}
 
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v3
