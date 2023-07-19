@@ -1,17 +1,11 @@
 pub mod author;
 pub mod branches;
 pub mod commits;
+pub mod errors;
 pub mod repos;
 pub mod url;
-/**
- * Error is an enum wrapping all possible errors.
- */
-#[derive(Debug)]
-pub enum Error {
-    ReqwestError(reqwest::Error),
-    EnvError(std::env::VarError),
-    DeserializeError(serde_json::Error),
-}
+
+use crate::errors::Error;
 
 /**
  * Client is a struct that represents a client to the Codecov API.
