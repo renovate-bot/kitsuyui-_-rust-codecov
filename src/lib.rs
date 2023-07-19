@@ -1,7 +1,7 @@
-mod author;
-mod commits;
-mod repos;
-mod url;
+pub mod author;
+pub mod commits;
+pub mod repos;
+pub mod url;
 /**
  * Error is an enum wrapping all possible errors.
  */
