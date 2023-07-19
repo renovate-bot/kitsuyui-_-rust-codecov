@@ -1,8 +1,8 @@
 # rust-codecov
 
-[![Crates.io](https://img.shields.io/crates/d/rust-codecov)](https://crates.io/crates/rust-codecov)
+[![Crates.io](https://img.shields.io/crates/d/codecov)](https://crates.io/crates/codecov)
 [![codecov](https://codecov.io/gh/kitsuyui/rust-codecov/branch/main/graph/badge.svg?token=0OM9KWFZQC)](https://codecov.io/gh/kitsuyui/rust-codecov)
-[![crates.io](https://img.shields.io/crates/v/rust-codecov.svg)](https://crates.io/crates/rust-codecov)
+[![crates.io](https://img.shields.io/crates/v/codecov.svg)](https://crates.io/crates/codecov)
 
 ## Description
 
@@ -12,7 +12,7 @@ https://docs.codecov.com/reference/overview
 ## Usage
 
 ```rust
-use rust_codecov::{Client, Owner};
+use codecov::{Client, Owner};
 
 // let client = Client::new("1234-5678-9012-3456");
 let client = Client::new_from_env();  // Read from CODECOV_OWNER_TOKEN
