@@ -23,11 +23,18 @@ pub struct Totals {
 /**
  * Diff is a struct that represents the diff for a commit.
  * Diff may be a u64 or an array of Option<String> like this:
- * "diff": [0, 0, 0, 0, 0, null, 0, 0, 0, 0, null, null, 0]
+ * "diff": [0, 0, 0, 0, "81.81818", null, 0, 0, 0, 0, "84.5", null, 0]
  */
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(untagged)]
 pub enum Diff {
     Value(u64),
-    Array(Vec<Option<u64>>),
+    Array(Vec<Option<DiffValue>>),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(untagged)]
+pub enum DiffValue {
+    NumValue(u64),
+    StringValue(String),
 }
