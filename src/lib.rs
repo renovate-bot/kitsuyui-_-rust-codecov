@@ -1,4 +1,5 @@
 pub mod author;
+pub mod branches;
 pub mod commits;
 pub mod repos;
 pub mod url;
@@ -9,6 +10,7 @@ pub mod url;
 pub enum Error {
     ReqwestError(reqwest::Error),
     EnvError(std::env::VarError),
+    DeserializeError(serde_json::Error),
 }
 
 /**
@@ -44,10 +46,16 @@ impl Client {
     }
 
     fn owner_endpoint(&self, owner: &Owner) -> String {
-        format!(
-            "{}/{}/{}",
-            "https://codecov.io/api/v2", owner.service, owner.username
-        )
+        let api_endpoint = "https://codecov.io/api/v2";
+        format!("{}/{}/{}", api_endpoint, owner.service, owner.username)
+    }
+
+    fn repos_endpoint(&self, author: &author::Author) -> String {
+        let owner_endpoint = self.owner_endpoint(&Owner {
+            service: author.service.clone(),
+            username: author.username.clone(),
+        });
+        format!("{}/repos/{}", owner_endpoint, author.name)
     }
 
     /**
@@ -88,6 +96,13 @@ impl Client {
      * This is a helper function for get_all_repos.
      */
     fn get_repos_page(&self, url: &str) -> Result<repos::ReposAPIResponse, Error> {
+        self.api_request::<repos::ReposAPIResponse>(url)
+    }
+
+    /**
+     * api_raw_json returns a serde_json::Value from a given url.
+     */
+    fn api_raw_json(&self, url: &str) -> Result<serde_json::Value, Error> {
         let client = reqwest::blocking::Client::new();
         let req = client
             .get(url)
@@ -96,35 +111,44 @@ impl Client {
             Ok(res) => res,
             Err(e) => return Err(Error::ReqwestError(e)),
         };
-        let repos = match res.json::<repos::ReposAPIResponse>() {
-            Ok(repos) => repos,
+        let res = match res.json::<serde_json::Value>() {
+            Ok(res) => res,
             Err(e) => return Err(Error::ReqwestError(e)),
         };
-        Ok(repos)
+        Ok(res)
+    }
+
+    /**
+     * api_request returns a deserialized struct from a given url.
+     */
+    fn api_request<T: serde::de::DeserializeOwned + std::fmt::Debug>(
+        &self,
+        url: &str,
+    ) -> Result<T, Error> {
+        let res = self.api_raw_json(url)?;
+        let data = match serde_json::from_value::<T>(res) {
+            Ok(data) => data,
+            Err(e) => return Err(Error::DeserializeError(e)),
+        };
+        Ok(data)
     }
 
     pub fn get_commits(
         &self,
         author: &author::Author,
     ) -> Result<commits::CommitsAPIResponse, Error> {
-        let client = reqwest::blocking::Client::new();
-        let owner_endpoint = self.owner_endpoint(&Owner {
-            service: author.service.clone(),
-            username: author.username.clone(),
-        });
-        let url = format!("{}/repos/{}/commits", owner_endpoint, author.name,);
-        let req = client
-            .get(url)
-            .header("Authorization", self.auth_header_val());
-        let res = match req.send() {
-            Ok(res) => res,
-            Err(e) => return Err(Error::ReqwestError(e)),
-        };
-        let commits = match res.json::<commits::CommitsAPIResponse>() {
-            Ok(commits) => commits,
-            Err(e) => return Err(Error::ReqwestError(e)),
-        };
+        let url = format!("{}/commits", self.repos_endpoint(author));
+        let commits = self.api_request::<commits::CommitsAPIResponse>(&url)?;
         Ok(commits)
+    }
+
+    pub fn get_branches(
+        &self,
+        author: &author::Author,
+    ) -> Result<branches::BranchesAPIResponse, Error> {
+        let url = format!("{}/branches", self.repos_endpoint(author));
+        let branches = self.api_request::<branches::BranchesAPIResponse>(&url)?;
+        Ok(branches)
     }
 }
 
@@ -153,5 +177,17 @@ mod tests {
         };
         let commits = client.get_commits(&author).unwrap();
         assert!(!commits.results.is_empty());
+    }
+
+    #[test]
+    fn test_get_branches() {
+        let client = Client::new_from_env().unwrap();
+        let author = author::Author {
+            service: "github".to_string(),
+            username: "codecov".to_string(),
+            name: "codecov-demo".to_string(),
+        };
+        let branches = client.get_branches(&author).unwrap();
+        assert!(!branches.results.is_empty());
     }
 }
