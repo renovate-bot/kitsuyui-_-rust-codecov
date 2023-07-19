@@ -1,9 +1,12 @@
 pub mod author;
+pub mod branch_detail;
 pub mod branches;
 pub mod commits;
 pub mod errors;
 pub mod repos;
+pub mod totals;
 pub mod url;
+use author::Author;
 
 use crate::errors::Error;
 
@@ -152,6 +155,20 @@ impl Client {
         let branches = self.api_request::<branches::BranchesAPIResponse>(&url)?;
         Ok(branches)
     }
+
+    /**
+     * get_branch_detail returns a branch detail for a given author and branch name.
+     * https://docs.codecov.com/reference/repos_branches_retrieve
+     */
+    pub fn get_branch_detail(
+        &self,
+        author: &Author,
+        branch_name: &str,
+    ) -> Result<branch_detail::BranchDetailAPIResponse, Error> {
+        let url = format!("{}/branches/{}", self.repos_endpoint(author), branch_name);
+        let branch_detail = self.api_request::<branch_detail::BranchDetailAPIResponse>(&url)?;
+        Ok(branch_detail)
+    }
 }
 
 #[cfg(test)]
@@ -191,5 +208,18 @@ mod tests {
         };
         let branches = client.get_branches(&author).unwrap();
         assert!(!branches.results.is_empty());
+    }
+
+    #[test]
+    fn test_get_branch_detail() {
+        let client = Client::new_from_env().unwrap();
+        let author = author::Author {
+            service: "github".to_string(),
+            username: "codecov".to_string(),
+            name: "codecov-demo".to_string(),
+        };
+        let branch_name = "main";
+        let branch_detail = client.get_branch_detail(&author, branch_name).unwrap();
+        assert_eq!(branch_detail.name, branch_name);
     }
 }
