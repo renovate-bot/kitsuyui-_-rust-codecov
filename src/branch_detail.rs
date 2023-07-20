@@ -4,13 +4,31 @@ use crate::author::Author;
 use crate::totals::Totals;
 
 /**
+ * BranchDetailAPIResponse is an enum wrapping all possible responses from the branches API.
+ */
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(untagged)]
+pub enum BranchDetailAPIResponse {
+    Success(Box<BranchDetailAPISuccessResponse>),
+    NotFound(BranchNotFound),
+}
+
+/**
  * BranchesAPIResponse is a struct that represents the response from the branches API.
  */
 #[derive(Serialize, Deserialize, Debug)]
-pub struct BranchDetailAPIResponse {
-    pub head_commit: Option<HeadCommit>,
+pub struct BranchDetailAPISuccessResponse {
+    pub head_commit: HeadCommit,
     pub name: String,
     pub updatestamp: String, // TODO: ISO Date
+}
+
+/**
+ * BranchNotFound is a struct that represents a branch not found error.
+ */
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BranchNotFound {
+    pub detail: String,
 }
 
 /**
@@ -20,7 +38,7 @@ pub struct BranchDetailAPIResponse {
 pub struct HeadCommit {
     pub author: Author,
     pub branch: String,
-    pub ci_passed: bool,
+    pub ci_passed: Option<bool>,
     pub commitid: String,
     pub message: String,
     pub parent: String,
@@ -53,9 +71,18 @@ impl BranchDetailAPIResponse {
      * Returns the latest coverage for a branch.
      */
     pub fn latest_coverage(&self) -> f64 {
-        match self.head_commit {
-            Some(ref head_commit) => head_commit.totals.coverage,
-            None => 0.0,
+        match self {
+            BranchDetailAPIResponse::Success(branch_detail) => branch_detail.latest_coverage(),
+            BranchDetailAPIResponse::NotFound(_) => 0.0,
         }
+    }
+}
+
+impl BranchDetailAPISuccessResponse {
+    /**
+     * Returns the latest coverage for a branch.
+     */
+    pub fn latest_coverage(&self) -> f64 {
+        self.head_commit.totals.coverage
     }
 }

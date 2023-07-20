@@ -212,7 +212,23 @@ mod tests {
         let author = author::Author::new("github", "codecov", "codecov-demo");
         let branch_name = "main";
         let branch_detail = client.get_branch_detail(&author, branch_name).unwrap();
-        assert_eq!(branch_detail.name, branch_name);
-        assert!(branch_detail.latest_coverage() > 0.0)
+        match branch_detail {
+            branch_detail::BranchDetailAPIResponse::Success(detail) => {
+                assert_eq!(detail.name, branch_name);
+                assert!(detail.latest_coverage() > 0.0)
+            }
+            _ => panic!("should be success"),
+        }
+    }
+
+    #[test]
+    fn test_get_branch_detail_not_found() {
+        let client = Client::new_from_env().unwrap();
+        let author = author::Author::new("github", "kitsuyui", "rust-codecov");
+        let branch_name = "aaaaaaaaaa";
+        let branch_detail = client.get_branch_detail(&author, branch_name).unwrap();
+        if let branch_detail::BranchDetailAPIResponse::Success(_) = branch_detail {
+            panic!("should be not found");
+        }
     }
 }
