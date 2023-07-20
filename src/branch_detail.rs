@@ -8,7 +8,7 @@ use crate::totals::Totals;
  */
 #[derive(Serialize, Deserialize, Debug)]
 pub struct BranchDetailAPIResponse {
-    pub head_commit: HeadCommit,
+    pub head_commit: Option<HeadCommit>,
     pub name: String,
     pub updatestamp: String, // TODO: ISO Date
 }
@@ -53,6 +53,9 @@ impl BranchDetailAPIResponse {
      * Returns the latest coverage for a branch.
      */
     pub fn latest_coverage(&self) -> f64 {
-        self.head_commit.totals.coverage
+        match self.head_commit {
+            Some(ref head_commit) => head_commit.totals.coverage,
+            None => 0.0,
+        }
     }
 }
