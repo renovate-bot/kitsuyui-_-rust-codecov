@@ -20,6 +20,8 @@ pub struct CommitsAPIResponse {
 
 /**
  * CommitAuthor is a struct that represents the author of a commit.
+ * Note: This is different from the Author struct in src/author.rs.
+ * name is optional in this struct.
  */
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CommitAuthor {
